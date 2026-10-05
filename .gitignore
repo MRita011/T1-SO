@@ -58,3 +58,5 @@ dkms.conf
 /campo-minado
 /paralelo
 /union-find
+/sequencial
+/desempenho

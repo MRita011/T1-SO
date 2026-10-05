@@ -1,8 +1,7 @@
 #include <stdlib.h>
 #include "union-find.h"
 
-int uf_criar(UnionFind *uf, int quantidade)
-{
+int uf_criar(UnionFind *uf, int quantidade) {
     int i;
 
     uf->pai = (int *)malloc(quantidade * sizeof(int));
@@ -24,8 +23,7 @@ int uf_criar(UnionFind *uf, int quantidade)
     return 1;
 }
 
-void uf_destruir(UnionFind *uf)
-{
+void uf_destruir(UnionFind *uf) {
     free(uf->pai);
     free(uf->tamanho);
 
@@ -34,8 +32,7 @@ void uf_destruir(UnionFind *uf)
     uf->quantidade = 0;
 }
 
-int uf_find(UnionFind *uf, int elemento)
-{
+int uf_find(UnionFind *uf, int elemento) {
     if (uf->pai[elemento] != elemento) {
         uf->pai[elemento] = uf_find(uf, uf->pai[elemento]);
     }
@@ -43,8 +40,7 @@ int uf_find(UnionFind *uf, int elemento)
     return uf->pai[elemento];
 }
 
-int uf_union(UnionFind *uf, int a, int b)
-{
+int uf_union(UnionFind *uf, int a, int b) {
     int raiz_a;
     int raiz_b;
 

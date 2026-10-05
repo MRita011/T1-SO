@@ -10,7 +10,7 @@ A versão sequencial realiza a contagem de objetos em uma matriz binária utiliz
 No Linux, macOS ou WSL:
 
 ```bash
-gcc -std=c89 -Wall -Wextra -pedantic src/conta-objetos-sequencial.c -o sequencial
+gcc -std=c89 -Wall -Wextra -pedantic -pthread src/conta-objetos-sequencial.c src/lib/contagem.c src/lib/flood-fill.c src/lib/union-find.c -o sequencial
 ```
 e depois:
 
@@ -31,11 +31,7 @@ Atualmente, a implementação realiza a contagem dos componentes locais de cada 
 No Linux, macOS ou WSL:
 
 ```bash
-gcc -std=c89 -Wall -Wextra -pedantic -pthread \
-src/conta-objetos-paralelo.c \
-src/flood-fill.c \
-src/union-find.c \
--o paralelo
+gcc -std=c89 -Wall -Wextra -pedantic -pthread src/conta-objetos-paralelo.c src/lib/contagem.c src/lib/flood-fill.c src/lib/union-find.c -o paralelo
 ```
 e depois:
 
