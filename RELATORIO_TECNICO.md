@@ -1,10 +1,10 @@
 # Relatório técnico - Contagem paralela de objetos em uma matriz binária
 
-> **Disciplina:** Sistemas Operacionais - 2026/II  
-> **Professor:** Prof. Filipo Novo Mór  
-> **Instituição:** Pontifícia Universidade Católica do Rio Grande do Sul - Escola Politécnica  
-> **Repositório:** [https://github.com/MRita011/T1-SO](https://github.com/MRita011/T1-SO)  
-> **Versão do relatório:** 1.0  
+> **Disciplina:** Sistemas Operacionais - 2026/II
+> **Professor:** Prof. Filipo Novo Mór
+> **Instituição:** Pontifícia Universidade Católica do Rio Grande do Sul - Escola Politécnica
+> **Repositório:** [https://github.com/MRita011/T1-SO](https://github.com/MRita011/T1-SO)
+> **Versão do relatório:** 1.0
 > **Data:** 05/10/2026
 
 ## Identificação
@@ -16,16 +16,14 @@
 | Integrante 2 | Mayra Bordin de Abreu |
 | Matrícula do integrante 2 | 23112156 |
 | Integrante 3 | Jully Anne Seyffert |
-| Matrícula do integrante 3 | [PREENCHER ou `Não se aplica`] |
+| Matrícula do integrante 3 | 23280111 |
 | Integrante 4 | Gabriel Ribeiro Kowaleski |
 | Matrícula do integrante 4 | 23112539 |
 | Modalidade | grupo |
 | Turma | 330 |
 | Estratégia paralela | Pthreads |
 | Plataforma testada | Linux - Ubuntu 26.04.1 LTS em ambiente WSL |
-| Commit avaliado | `[PREENCHER COM HASH FINAL]` |
-
-> Por enquanto o commit  `63c8ead` correspondeu à versão com testes funcionais, medições e gráficos de desempenho. O campo acima deve ser atualizado com o hash do commit final entregue. A PREENCHER RITA TEM QUE PREENCHER
+| Commit avaliado | `63c8ead` |
 
 ## Resumo
 
@@ -621,13 +619,17 @@ A matriz de desempenho é preenchida por uma regra determinística presente em [
 A aceleração para `p` trabalhadores é calculada por:
 
 $$
+
 S(p) = \frac{T_{sequencial}}{T_{paralelo}(p)}
+
 $$
 
 A eficiência paralela é calculada por:
 
 $$
+
 E(p) = \frac{S(p)}{p}
+
 $$
 
 ### 9.3 Resultados consolidados
@@ -819,18 +821,18 @@ Os testes de desempenho mostraram aceleração em todas as configurações da co
 - [ ] Testes obrigatórios e adicionais.
 - [ ] Resultados de desempenho.
 - [ ] Conclusões.
-- [ ] Participação de ambos os integrantes, quando o trabalho for em dupla.
+- [ ] Participação de todos os integrantes do grupo.
 
 ## 14. Contribuições dos integrantes
 
-| Atividade | Integrante 1 | Integrante 2 | Evidência/observação |
-|---|---|---|---|
-| Projeto da solução sequencial | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Projeto da solução paralela | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Sincronização/comunicação | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Consolidação | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Testes e medições | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Documentação e apresentação | [PREENCHER] | [PREENCHER] | [PREENCHER] |
+| Atividade | Maria Rita | Mayra | Jully | Gabriel | Evidência/observação |
+|---|---|---|---|---|---|
+| Projeto da solução sequencial | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
+| Projeto da solução paralela | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
+| Sincronização/comunicação | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
+| Consolidação | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
+| Testes e medições | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
+| Documentação e apresentação | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
 
 Todos os integrantes declaram compreender integralmente o código, as estruturas de dados, a divisão do trabalho, a sincronização, a comunicação, a consolidação e os resultados apresentados.
 
@@ -878,14 +880,14 @@ As sugestões fornecidas por ferramentas externas foram verificadas por compila�
 ### Repositório e apresentação
 
 - [ ] O repositório do GitHub está público.
-- [ ] `README.md` contém descrição, autoria, compilação, execução e arquitetura.
+- [x] `README.md` contém descrição, autoria, compilação, execução e arquitetura.
 - [x] O `Makefile` ou as instruções equivalentes permitem compilação reproduzível.
 - [x] As matrizes de teste e seus resultados estão incluídos.
 - [x] A análise de desempenho está incluída.
 - [ ] Os slides estão em `slides/apresentacao.pdf`.
 - [ ] O link do vídeo está acessível e o vídeo tem até 10 minutos.
 - [x] Ferramentas, referências, bibliotecas e códigos externos foram identificados.
-- [ ] O hash do commit avaliado foi registrado neste relatório.
+- [x] O hash do commit avaliado foi registrado neste relatório.
 
 ## Apêndice A - Registro de comandos
 
