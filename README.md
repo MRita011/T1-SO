@@ -32,7 +32,10 @@ No Linux, macOS ou WSL:
 
 ```bash
 gcc -std=c89 -Wall -Wextra -pedantic -pthread \
-src/conta-objetos-paralelo.c -o paralelo
+src/conta-objetos-paralelo.c \
+src/flood-fill.c \
+src/union-find.c \
+-o paralelo
 ```
 e depois:
 
