@@ -296,8 +296,8 @@ int main(void) {
         0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1
     };
 
+    
     int resultado;
-
     int esperado;
 
     printf("\n");
@@ -314,7 +314,7 @@ int main(void) {
     printf("| %-5d | %-8s | %-7d | %-8d | %-6d | %-8s |\n", 2, "6x8", 2, esperado, resultado, resultado == esperado ? "OK" : "ERRO");
 
     esperado = 5;
-    resultado = contar_objetos_paralelo(matriz3, 8, 8, 2);
+    resultado = contar_objetos_paralelo(matriz3, 8, 8, 4);
     printf("| %-5d | %-8s | %-7d | %-8d | %-6d | %-8s |\n", 3, "8x8", 2, esperado, resultado, resultado == esperado ? "OK" : "ERRO");
 
     esperado = 6;
