@@ -136,7 +136,7 @@ int contar_objetos_union_find(int *matriz, int linhas, int colunas)
                 nova_linha = i + delta_linha[k];
                 nova_coluna = j + delta_coluna[k];
 
-                 // Verifica se o vizinho esta dentro da matriz
+                 /* Verifica se o vizinho esta dentro da matriz */
                  
                 if (nova_linha >= 0 &&
                     nova_linha < linhas &&
@@ -175,7 +175,7 @@ int contar_objetos_union_find(int *matriz, int linhas, int colunas)
     return objetos;
 }
 
-//Exemplo de utilizacao.
+/* Exemplo de utilizacao */
 
 int main(void)
 {
