@@ -53,3 +53,10 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# Binarios gerados localmente
+/campo-minado
+/paralelo
+/union-find
+/sequencial
+/desempenho

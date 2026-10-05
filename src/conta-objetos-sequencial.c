@@ -1,11 +1,8 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include "lib/contagem.h"
 
-int contar_objetos(int *matriz, int linhas, int colunas);
+int main(void) {
 
-void flood_fill (int *matriz, int *visitado, int linhas, int colunas, int linha, int coluna);
-
-int main (void) {
     int matriz1[] = {
         1, 1, 0, 0, 0,
         1, 1, 0, 0, 0,
@@ -61,70 +58,30 @@ int main (void) {
         0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1
     };
 
-    printf("Teste 1 - esperado 3: %d\n", contar_objetos(matriz1, 5, 5));
+    int resultado;
 
-    printf("Teste 2 - esperado 4: %d\n", contar_objetos(matriz2, 6, 8));
+    printf("\n");
+    printf("+--------+----------+----------+--------+----------+\n");
+    printf("| Matriz | Dimensao | Esperado | Obtido | Status   |\n");
+    printf("+--------+----------+----------+--------+----------+\n");
 
-    printf("Teste 3 - esperado 5: %d\n", contar_objetos(matriz3, 8, 8));
+    resultado = contar_objetos_sequencial(matriz1, 5, 5);
+    printf("| %-6d | %2dx%-5d | %-8d | %-6d | %-8s |\n", 1, 5, 5, 3, resultado, resultado == 3 ? "OK" : "ERRO");
 
-    printf("Teste 4 - esperado 6: %d\n", contar_objetos(matriz4, 9, 12));
+    resultado = contar_objetos_sequencial(matriz2, 6, 8);
+    printf("| %-6d | %2dx%-5d | %-8d | %-6d | %-8s |\n", 2, 6, 8, 4, resultado, resultado == 4 ? "OK" : "ERRO");
 
-    printf("Teste 5 - esperado 7: %d\n", contar_objetos(matriz5, 12, 12));
+    resultado = contar_objetos_sequencial(matriz3, 8, 8);
+    printf("| %-6d | %2dx%-5d | %-8d | %-6d | %-8s |\n", 3, 8, 8, 5, resultado, resultado == 5 ? "OK" : "ERRO");
+
+    resultado = contar_objetos_sequencial(matriz4, 9, 12);
+    printf("| %-6d | %2dx%-5d | %-8d | %-6d | %-8s |\n", 4, 9, 12, 6, resultado, resultado == 6 ? "OK" : "ERRO");
+
+    resultado = contar_objetos_sequencial(matriz5, 12, 12);
+    printf("| %-6d | %2dx%-5d | %-8d | %-6d | %-8s |\n", 5, 12, 12, 7, resultado, resultado == 7 ? "OK" : "ERRO");
+
+    printf("+--------+----------+----------+--------+----------+\n");
+    printf("\n");
 
     return 0;
-}
-
-void flood_fill(int *matriz, int *visitado, int linhas, int colunas, int linha, int coluna) {
-    int dl[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
-    int dc[8] = {-1,  0,  1, -1, 1, -1, 0, 1};
-
-    int nova_linha, nova_coluna;
-    int k,indice, novo_indice;
-
-    indice = linha * colunas + coluna;
-
-    visitado[indice] = 1;
-
-    for (k = 0; k < 8; k++) {
-        nova_linha = linha + dl[k];
-        nova_coluna = coluna + dc[k];
-
-        if (nova_linha >= 0 && nova_linha < linhas && nova_coluna >= 0 && nova_coluna < colunas) {
-            novo_indice = nova_linha * colunas + nova_coluna;
-
-            if (matriz[novo_indice] == 1 && visitado[novo_indice] == 0) {
-                flood_fill(matriz, visitado, linhas, colunas, nova_linha, nova_coluna);
-            }
-        }
-    }
-}
-
-int contar_objetos(int *matriz, int linhas, int colunas) {
-    int *visitado;
-    int i, j, objetos, indice;
-
-    visitado = (int *) calloc(linhas * colunas, sizeof(int));
-
-    if (visitado == NULL) {
-        printf("Erro ao aclocar memória.\n");
-        return -1;
-    }
-
-    objetos = 0;
-
-    for (i = 0; i < linhas; i++) {
-
-        for (j = 0; j < colunas; j++) {
-            indice = i * colunas + j;
-
-            if (matriz[indice] == 1 && visitado[indice] == 0) {
-                objetos++;
-
-                flood_fill(matriz, visitado, linhas, colunas, i,j);
-            }
-        }
-    }
-    free(visitado);
-
-    return objetos;
 }

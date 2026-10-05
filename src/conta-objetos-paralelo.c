@@ -1,43 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 
-typedef struct {
-    int *matriz;
-    int *rotulos; /* onde registra os objetos encontrados por cada thread */
-    int linhas;
-    int colunas;
-    int linha_inicio;
-    int linha_fim;
-    int id_thread; /* qual thread é*/
-    int objetos_locais; /* quantos objetos foram encontrados na região da thread */
-} ThreadArgs;
+#include "lib/contagem.h"
 
-int contar_objetos(int *matriz, int linhas, int colunas);
+int main(int argc, char *argv[]) {
 
-void flood_fill(
-    int *matriz,
-    int *visitado,
-    int linhas,
-    int colunas,
-    int linha,
-    int coluna
-);
+    int teste_diagonal[] = {
+        0, 1, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 1, 0
+    };
 
-void flood_fill_regiao(
-    int *matriz,
-    int *rotulos,
-    int colunas,
-    int linha_inicio,
-    int linha_fim,
-    int linha,
-    int coluna,
-    int rotulo
-);
+    int teste_tres_regioes[] = {
+        0, 1, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 1, 0,
+        0, 1, 0, 0,
+        0, 1, 0, 0
+    };
 
-void *processar_regiao(void *arg);
-
-int main (void) {
     int matriz1[] = {
         1, 1, 0, 0, 0,
         1, 1, 0, 0, 0,
@@ -93,172 +76,76 @@ int main (void) {
         0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1
     };
 
-    pthread_t threads[2];
-    ThreadArgs args[2];
-    int i, retorno;
-    int *rotulos;
+    int *matrizes[5];
+    int linhas[5] = {5, 6, 8, 9, 12};
+    int colunas[5] = {5, 8, 8, 12, 12};
+    int esperados[5] = {3, 4, 5, 6, 7};
 
-    rotulos = (int *) calloc(8 * 8, sizeof(int));
-    if (rotulos == NULL) {
-        printf("Erro ao alocar memória para os rótulos.\n");
+    int teste;
+    int num_threads;
+    int resultado;
+    int thread_inicio;
+    int thread_fim;
+
+    matrizes[0] = matriz1;
+    matrizes[1] = matriz2;
+    matrizes[2] = matriz3;
+    matrizes[3] = matriz4;
+    matrizes[4] = matriz5;
+
+    if (argc == 2) {
+        num_threads = atoi(argv[1]);
+
+        if (num_threads < 2 || num_threads > 4) {
+            printf("Uso: ./paralelo [2|3|4]\n");
+            return 1;
+        }
+
+        thread_inicio = num_threads;
+        thread_fim = num_threads;
+    }
+    else if (argc == 1) {
+        thread_inicio = 2;
+        thread_fim = 4;
+    }
+    else {
+        printf("Uso: ./paralelo [2|3|4]\n");
         return 1;
     }
 
-    /* thread que percorre da linha 0 ate a linha 3 (matriz 3) */
-    args[0].matriz = matriz3;
-    args[0].rotulos = rotulos;
-    args[0].id_thread = 0;
-    args[0].linhas = 8;
-    args[0].colunas = 8;
-    args[0].linha_inicio = 0;
-    args[0].linha_fim = 3;
-    args[0].objetos_locais = 0;
+    printf("\n");
+    printf("+--------+----------+---------+----------+--------+----------+\n");
+    printf("| Matriz | Dimensao | Threads | Esperado | Obtido | Status   |\n");
+    printf("+--------+----------+---------+----------+--------+----------+\n");
 
-    /* thread que percorre da linha 4 ate a linha 7 (matriz 3) */
-    args[1].matriz = matriz3;
-    args[1].rotulos = rotulos;
-    args[1].id_thread = 1;
-    args[1].linhas = 8;
-    args[1].colunas = 8;
-    args[1].linha_inicio = 4;
-    args[1].linha_fim = 7;
-    args[1].objetos_locais = 0;
+    for (teste = 0; teste < 5; teste++) {
 
+        for (num_threads = thread_inicio; num_threads <= thread_fim; num_threads++) {
+            resultado = contar_objetos_paralelo(matrizes[teste], linhas[teste], colunas[teste], num_threads);
+            printf("| %-6d | %2dx%-5d | %-7d | %-8d | %-6d | %-8s |\n", teste + 1, linhas[teste], colunas[teste], num_threads, esperados[teste], resultado, resultado == esperados[teste] ? "OK" : "ERRO");
+        }
 
-    for (i = 0; i < 2; i++) {
-        retorno = pthread_create(&threads[i], NULL, processar_regiao, &args[i]);
-        if (retorno != 0) {
-            printf("Erro ao criar thread %d\n", i);
-            free(rotulos);
-            return 1;
+        if (teste < 4) {
+            printf("+--------+----------+---------+----------+--------+----------+\n");
         }
     }
 
-    for (i = 0; i < 2; i++) {
-        retorno = pthread_join(threads[i], NULL);
+    printf("+--------+----------+---------+----------+--------+----------+\n");
+    printf("\n");
 
-        if(retorno != 0) {
-            printf("Erro ao aguardar thread %d\n", i);
-            free(rotulos);
-            return 1;
-        }
-    }
-    
-    printf("Total local antes da contagem final: %d\n", args[0].objetos_locais + args[1].objetos_locais);
-    free(rotulos);
+    printf("Testes especificos de fronteira\n\n");
+    printf("+------------+----------+---------+----------+--------+----------+\n");
+    printf("| Tipo       | Dimensao | Threads | Esperado | Obtido | Status   |\n");
+    printf("+------------+----------+---------+----------+--------+----------+\n");
+
+    resultado = contar_objetos_paralelo(teste_diagonal, 4, 4, 2);
+    printf("| %-10s | %2dx%-5d | %-7d | %-8d | %-6d | %-8s |\n", "Diagonal", 4, 4, 2, 1, resultado, resultado == 1 ? "OK" : "ERRO");
+
+    resultado = contar_objetos_paralelo(teste_tres_regioes, 6, 4, 3);
+    printf("| %-10s | %2dx%-5d | %-7d | %-8d | %-6d | %-8s |\n", "3 regioes", 6, 4, 3, 1, resultado, resultado == 1 ? "OK" : "ERRO");
+
+    printf("+------------+----------+---------+----------+--------+----------+\n");
+    printf("\n");
+
     return 0;
-}
-
-void flood_fill(int *matriz, int *visitado, int linhas, int colunas, int linha, int coluna) {
-    int dl[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
-    int dc[8] = {-1,  0,  1, -1, 1, -1, 0, 1};
-
-    int nova_linha, nova_coluna;
-    int k,indice, novo_indice;
-
-    indice = linha * colunas + coluna;
-
-    visitado[indice] = 1;
-
-    for (k = 0; k < 8; k++) {
-        nova_linha = linha + dl[k];
-        nova_coluna = coluna + dc[k];
-
-        if (nova_linha >= 0 && nova_linha < linhas && nova_coluna >= 0 && nova_coluna < colunas) {
-            novo_indice = nova_linha * colunas + nova_coluna;
-
-            if (matriz[novo_indice] == 1 && visitado[novo_indice] == 0) {
-                flood_fill(matriz, visitado, linhas, colunas, nova_linha, nova_coluna);
-            }
-        }
-    }
-}
-
-int contar_objetos(int *matriz, int linhas, int colunas) {
-    int *visitado;
-    int i, j, objetos, indice;
-
-    visitado = (int *) calloc(linhas * colunas, sizeof(int));
-
-    if (visitado == NULL) {
-        printf("Erro ao aclocar memória.\n");
-        return -1;
-    }
-
-    objetos = 0;
-
-    for (i = 0; i < linhas; i++) {
-
-        for (j = 0; j < colunas; j++) {
-            indice = i * colunas + j;
-
-            if (matriz[indice] == 1 && visitado[indice] == 0) {
-                objetos++;
-
-                flood_fill(matriz, visitado, linhas, colunas, i,j);
-            }
-        }
-    }
-    free(visitado);
-    return objetos;
-}
-
-void flood_fill_regiao(
-    int *matriz,
-    int *rotulos,
-    int colunas,
-    int linha_inicio,
-    int linha_fim,
-    int linha,
-    int coluna,
-    int rotulo
-) {
-    int dl[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
-    int dc[8] = {-1,  0,  1, -1, 1, -1, 0, 1};
-
-    int nova_linha, nova_coluna;
-    int k,indice, novo_indice;
-
-    indice = linha * colunas + coluna;
-
-    rotulos[indice] = rotulo;
-
-    for (k = 0; k < 8; k++) {
-        nova_linha = linha + dl[k];
-        nova_coluna = coluna + dc[k];
-
-        if (nova_linha >= linha_inicio && nova_linha <= linha_fim && nova_coluna >= 0 && nova_coluna < colunas) {
-            novo_indice = nova_linha * colunas + nova_coluna;
-
-            if (matriz[novo_indice] == 1 && rotulos[novo_indice] == 0) {
-                flood_fill_regiao(matriz, rotulos, colunas, linha_inicio, linha_fim, nova_linha, nova_coluna, rotulo);
-            }
-        }
-    }
-}
-
-void *processar_regiao(void *arg) {
-    ThreadArgs *dados;
-    int i, j, indice, rotulo;
-
-    dados = (ThreadArgs *) arg;
-    dados -> objetos_locais = 0;
-    
-    for (i = dados -> linha_inicio; i <= dados -> linha_fim; i++) {
-        for (j = 0; j < dados -> colunas; j++) {
-            indice = i * dados -> colunas + j;
-
-            if (dados -> matriz[indice] == 1 && dados -> rotulos[indice] == 0) {
-                
-                dados -> objetos_locais++;
-
-                rotulo = dados -> id_thread * (dados -> linhas * dados -> colunas) + dados -> objetos_locais;
-
-                flood_fill_regiao(dados -> matriz, dados -> rotulos, dados -> colunas, dados -> linha_inicio, dados -> linha_fim, i, j, rotulo);
-            }
-        }
-    }
-
-    printf("Thread %d: linhas %d a %d - %d componentes locais\n", dados -> id_thread, dados -> linha_inicio, dados -> linha_fim, dados -> objetos_locais);
-    return NULL;
 }
