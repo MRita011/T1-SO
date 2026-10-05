@@ -59,4 +59,5 @@ dkms.conf
 /paralelo
 /union-find
 /sequencial
+/desempenho.venv/
 /desempenho

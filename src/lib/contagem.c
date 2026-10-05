@@ -15,6 +15,7 @@ typedef struct {
     int linha_fim;
     int id_thread;
     int objetos_locais;
+    int erro;
 } ThreadArgs;
 
 static void *processar_regiao(void *arg);
@@ -25,12 +26,22 @@ static int consolidar_fronteira(int *matriz, int *rotulos, int colunas, int linh
 
 int contar_objetos_sequencial(int *matriz, int linhas, int colunas) {
     int *visitado;
-    int objetos, i, j, indice;
+    int *pilha;
+    int objetos;
+    int i;
+    int j;
+    int indice;
+    int total_celulas;
 
-    visitado = (int *)calloc(linhas * colunas, sizeof(int));
+    total_celulas = linhas * colunas;
 
-    if (visitado == NULL) {
-        printf("Erro ao alocar memoria para visitados.\n");
+    visitado = (int *)calloc(total_celulas, sizeof(int));
+    pilha = (int *)malloc(total_celulas * sizeof(int));
+
+    if (visitado == NULL || pilha == NULL) {
+        printf("Erro ao alocar memoria para a contagem sequencial.\n");
+        free(visitado);
+        free(pilha);
         return -1;
     }
 
@@ -42,15 +53,17 @@ int contar_objetos_sequencial(int *matriz, int linhas, int colunas) {
 
             if (matriz[indice] == 1 && visitado[indice] == 0) {
                 objetos++;
-                flood_fill(matriz, visitado, linhas, colunas, i, j);
+                flood_fill(matriz, visitado, linhas, colunas, i, j, pilha);
             }
         }
     }
 
     free(visitado);
+    free(pilha);
 
     return objetos;
 }
+
 
 /* Verifica a fronteira entre duas regioes */
 
@@ -58,8 +71,10 @@ static int consolidar_fronteira(int *matriz, int *rotulos, int colunas, int linh
     int coluna;
     int deslocamento;
     int coluna_inferior;
-    int indice_superior, indice_inferior;
-    int rotulo_superior, rotulo_inferior;
+    int indice_superior;
+    int indice_inferior;
+    int rotulo_superior;
+    int rotulo_inferior;
     int unioes;
 
     unioes = 0;
@@ -90,15 +105,31 @@ static int consolidar_fronteira(int *matriz, int *rotulos, int colunas, int linh
     return unioes;
 }
 
+
 /* Funcao executada por cada thread */
 
 static void *processar_regiao(void *arg) {
     ThreadArgs *dados;
-    int i, j;
-    int indice, rotulo;
+    int *pilha;
+    int total_celulas_regiao;
+    int i;
+    int j;
+    int indice;
+    int rotulo;
 
     dados = (ThreadArgs *)arg;
+
     dados->objetos_locais = 0;
+    dados->erro = 0;
+
+    total_celulas_regiao = (dados->linha_fim - dados->linha_inicio + 1) * dados->colunas;
+
+    pilha = (int *)malloc(total_celulas_regiao * sizeof(int));
+
+    if (pilha == NULL) {
+        dados->erro = 1;
+        return NULL;
+    }
 
     for (i = dados->linha_inicio; i <= dados->linha_fim; i++) {
         for (j = 0; j < dados->colunas; j++) {
@@ -106,16 +137,17 @@ static void *processar_regiao(void *arg) {
 
             if (dados->matriz[indice] == 1 && dados->rotulos[indice] == 0) {
                 dados->objetos_locais++;
-
                 rotulo = indice + 1;
-
-                flood_fill_regiao(dados->matriz, dados->rotulos, dados->colunas, dados->linha_inicio, dados->linha_fim, i, j, rotulo);
+                flood_fill_regiao(dados->matriz, dados->rotulos, dados->colunas, dados->linha_inicio, dados->linha_fim, i, j, rotulo, pilha);
             }
         }
     }
 
+    free(pilha);
+
     return NULL;
 }
+
 
 /* Contagem paralela */
 
@@ -128,10 +160,14 @@ int contar_objetos_paralelo(int *matriz, int linhas, int colunas, int num_thread
     int total_celulas;
     int max_rotulos;
 
-    int i, j, retorno;
+    int i;
+    int j;
+    int retorno;
     int threads_criadas;
+    int erro_join;
 
-    int total_local, total_global;
+    int total_local;
+    int total_global;
     int unioes;
 
     if (num_threads < 1 || num_threads > linhas) {
@@ -168,6 +204,7 @@ int contar_objetos_paralelo(int *matriz, int linhas, int colunas, int num_thread
         args[i].linha_inicio = i * linhas / num_threads;
         args[i].linha_fim = ((i + 1) * linhas / num_threads) - 1;
         args[i].objetos_locais = 0;
+        args[i].erro = 0;
     }
 
     threads_criadas = 0;
@@ -178,8 +215,20 @@ int contar_objetos_paralelo(int *matriz, int linhas, int colunas, int num_thread
         if (retorno != 0) {
             printf("Erro ao criar thread %d\n", i);
 
+            erro_join = 0;
+
             for (j = 0; j < threads_criadas; j++) {
-                pthread_join(threads[j], NULL);
+                retorno = pthread_join(threads[j], NULL);
+
+                if (retorno != 0) {
+                    printf("Erro ao aguardar thread %d durante limpeza\n", j);
+                    erro_join = 1;
+                }
+            }
+
+            if (erro_join) {
+                printf("Nao foi possivel finalizar todas as threads com seguranca.\n");
+                exit(EXIT_FAILURE);
             }
 
             free(threads);
@@ -192,11 +241,25 @@ int contar_objetos_paralelo(int *matriz, int linhas, int colunas, int num_thread
         threads_criadas++;
     }
 
+    erro_join = 0;
+
     for (i = 0; i < num_threads; i++) {
         retorno = pthread_join(threads[i], NULL);
 
         if (retorno != 0) {
             printf("Erro ao aguardar thread %d\n", i);
+            erro_join = 1;
+        }
+    }
+
+    if (erro_join) {
+        printf("Nao foi possivel finalizar todas as threads com seguranca.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (i = 0; i < num_threads; i++) {
+        if (args[i].erro) {
+            printf("Erro ao alocar memoria em uma das threads.\n");
             free(threads);
             free(args);
             free(rotulos);
