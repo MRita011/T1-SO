@@ -21,6 +21,13 @@ int main(int argc, char *argv[]) {
         0, 1, 0, 0
     };
 
+    int teste_zeros[] = {
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0
+    };
+
     int matriz1[] = {
         1, 1, 0, 0, 0,
         1, 1, 0, 0, 0,
@@ -133,18 +140,21 @@ int main(int argc, char *argv[]) {
     printf("+--------+----------+---------+----------+--------+----------+\n");
     printf("\n");
 
-    printf("Testes especificos de fronteira\n\n");
-    printf("+------------+----------+---------+----------+--------+----------+\n");
-    printf("| Tipo       | Dimensao | Threads | Esperado | Obtido | Status   |\n");
-    printf("+------------+----------+---------+----------+--------+----------+\n");
+    printf("Testes adicionais\n\n");
+    printf("+---------------+----------+---------+----------+--------+----------+\n");
+    printf("| Tipo          | Dimensao | Threads | Esperado | Obtido | Status   |\n");
+    printf("+---------------+----------+---------+----------+--------+----------+\n");
 
     resultado = contar_objetos_paralelo(teste_diagonal, 4, 4, 2);
-    printf("| %-10s | %2dx%-5d | %-7d | %-8d | %-6d | %-8s |\n", "Diagonal", 4, 4, 2, 1, resultado, resultado == 1 ? "OK" : "ERRO");
+    printf("| %-13s | %2dx%-5d | %-7d | %-8d | %-6d | %-8s |\n", "Diagonal", 4, 4, 2, 1, resultado, resultado == 1 ? "OK" : "ERRO");
 
     resultado = contar_objetos_paralelo(teste_tres_regioes, 6, 4, 3);
-    printf("| %-10s | %2dx%-5d | %-7d | %-8d | %-6d | %-8s |\n", "3 regioes", 6, 4, 3, 1, resultado, resultado == 1 ? "OK" : "ERRO");
+    printf("| %-13s | %2dx%-5d | %-7d | %-8d | %-6d | %-8s |\n", "3 regioes", 6, 4, 3, 1, resultado, resultado == 1 ? "OK" : "ERRO");
 
-    printf("+------------+----------+---------+----------+--------+----------+\n");
+    resultado = contar_objetos_paralelo(teste_zeros, 4, 4, 2);
+    printf("| %-13s | %2dx%-5d | %-7d | %-8d | %-6d | %-8s |\n", "Matriz zerada", 4, 4, 2, 0, resultado, resultado == 0 ? "OK" : "ERRO");
+
+    printf("+---------------+----------+---------+----------+--------+----------+\n");
     printf("\n");
 
     return 0;

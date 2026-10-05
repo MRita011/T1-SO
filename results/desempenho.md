@@ -1,80 +1,130 @@
 # Testes de desempenho
 
-## Configuração dos testes
+## Metodologia
 
-- 5 repetições por teste;
-- mesma matriz utilizada pelas versões sequencial e paralela;
-- versão paralela testada com 2, 3 e 4 threads;
-- o tempo apresentado corresponde à média das 5 execuções;
-- Flood Fill implementado de forma iterativa;
-- speedup calculado por:
+Os testes de desempenho foram realizados utilizando três tamanhos de matriz:
+
+- 1000x1000;
+- 2000x2000;
+- 4000x4000.
+
+Para cada tamanho foram executadas:
+
+- a versão sequencial;
+- a versão paralela com 2 threads;
+- a versão paralela com 3 threads;
+- a versão paralela com 4 threads.
+
+Cada configuração foi executada 5 vezes utilizando exatamente a mesma
+matriz binária.
+
+O tempo foi medido com `clock_gettime(CLOCK_MONOTONIC, ...)`.
+
+A medida representativa utilizada foi a média das cinco execuções.
+
+Como medida de dispersão foram registrados os valores mínimo e máximo.
+
+O speedup foi calculado por:
 
 ```text
-Speedup = Tempo sequencial / Tempo paralelo
+S(p) = Tsequencial / Tparalelo(p)
 ```
+
+A eficiência foi calculada por:
+
+```text
+E(p) = S(p) / p
+```
+
+Os dados brutos das execuções estão disponíveis em:
+
+```text
+results/medicoes.csv
+```
+
+---
 
 ## Matriz 1000x1000
 
-| Versão | Threads | Objetos | Tempo médio | Speedup |
-|---|---:|---:|---:|---:|
-| Sequencial | - | 45472 | 0.014655 s | 1.00 |
-| Paralela | 2 | 45472 | 0.012014 s | 1.22 |
-| Paralela | 3 | 45472 | 0.009519 s | 1.54 |
-| Paralela | 4 | 45472 | 0.011542 s | 1.27 |
+Quantidade de objetos encontrada: **45472**
 
-**Melhor resultado:** 3 threads, com speedup de **1.54**.
+| Versão | Threads | Média (ms) | Mínimo (ms) | Máximo (ms) | Speedup | Eficiência |
+|---|---:|---:|---:|---:|---:|---:|
+| Sequencial | 1 | 17.890 | 16.319 | 20.442 | 1.00 | 1.00 |
+| Paralela | 2 | 12.336 | 11.190 | 15.041 | 1.45 | 0.73 |
+| Paralela | 3 | 9.491 | 9.361 | 9.671 | 1.89 | 0.63 |
+| Paralela | 4 | 9.591 | 8.335 | 11.413 | 1.87 | 0.47 |
+
+A configuração com **3 threads** apresentou o menor tempo médio,
+9.491 ms, correspondendo a um speedup de **1.89**.
+
+---
 
 ## Matriz 2000x2000
 
-| Versão | Threads | Objetos | Tempo médio | Speedup |
-|---|---:|---:|---:|---:|
-| Sequencial | - | 181340 | 0.058888 s | 1.00 |
-| Paralela | 2 | 181340 | 0.046245 s | 1.27 |
-| Paralela | 3 | 181340 | 0.037831 s | 1.56 |
-| Paralela | 4 | 181340 | 0.040353 s | 1.46 |
+Quantidade de objetos encontrada: **181340**
 
-**Melhor resultado:** 3 threads, com speedup de **1.56**.
+| Versão | Threads | Média (ms) | Mínimo (ms) | Máximo (ms) | Speedup | Eficiência |
+|---|---:|---:|---:|---:|---:|---:|
+| Sequencial | 1 | 63.465 | 60.904 | 66.935 | 1.00 | 1.00 |
+| Paralela | 2 | 47.781 | 43.299 | 58.032 | 1.33 | 0.66 |
+| Paralela | 3 | 38.945 | 35.523 | 49.799 | 1.63 | 0.54 |
+| Paralela | 4 | 40.287 | 32.459 | 46.855 | 1.58 | 0.39 |
+
+Novamente, a configuração com **3 threads** apresentou o melhor tempo
+médio, 38.945 ms, com speedup de **1.63**.
+
+---
 
 ## Matriz 4000x4000
 
-| Versão | Threads | Objetos | Tempo médio | Speedup |
-|---|---:|---:|---:|---:|
-| Sequencial | - | 724346 | 0.224660 s | 1.00 |
-| Paralela | 2 | 724346 | 0.221963 s | 1.01 |
-| Paralela | 3 | 724346 | 0.193788 s | 1.16 |
-| Paralela | 4 | 724346 | 0.210604 s | 1.07 |
+Quantidade de objetos encontrada: **724346**
 
-**Melhor resultado:** 3 threads, com speedup de **1.16**.
+| Versão | Threads | Média (ms) | Mínimo (ms) | Máximo (ms) | Speedup | Eficiência |
+|---|---:|---:|---:|---:|---:|---:|
+| Sequencial | 1 | 265.057 | 250.119 | 292.157 | 1.00 | 1.00 |
+| Paralela | 2 | 254.603 | 210.847 | 291.411 | 1.04 | 0.52 |
+| Paralela | 3 | 196.809 | 186.442 | 205.183 | 1.35 | 0.45 |
+| Paralela | 4 | 198.839 | 184.956 | 235.890 | 1.33 | 0.33 |
 
-# Conclusão
+A configuração com **3 threads** também apresentou o melhor resultado
+na maior matriz, com tempo médio de 196.809 ms e speedup de **1.35**.
 
-A versão paralela apresentou a mesma quantidade de objetos da versão
-sequencial em todas as configurações testadas, confirmando a correção
-dos resultados.
+---
 
-Os melhores speedups observados foram:
+## Análise
 
-- **1.54** com 3 threads na matriz 1000x1000;
-- **1.56** com 3 threads na matriz 2000x2000;
-- **1.16** com 3 threads na matriz 4000x4000.
+Todos os testes produziram exatamente a mesma quantidade de objetos nas
+versões sequencial e paralela, independentemente da quantidade de
+threads utilizada.
 
-Nos testes realizados, a configuração com **3 threads apresentou o
-melhor desempenho nos três tamanhos de matriz**.
+Os resultados demonstram que a paralelização reduziu o tempo médio de
+execução nas três matrizes avaliadas.
 
-Os resultados também mostram que aumentar a quantidade de threads não
-produz necessariamente um ganho proporcional. A utilização de 4 threads
-não superou a configuração com 3 threads em nenhum dos testes finais.
+A melhor configuração observada foi a utilização de **3 threads**:
 
-Esse comportamento pode ser explicado pelos custos associados à criação
-e sincronização das threads, ao acesso concorrente à memória e à etapa
-sequencial de consolidação dos componentes encontrados nas fronteiras
-entre as regiões.
+- speedup de 1.89 na matriz 1000x1000;
+- speedup de 1.63 na matriz 2000x2000;
+- speedup de 1.35 na matriz 4000x4000.
 
-Na matriz 4000x4000, por exemplo, a utilização de 2 threads apresentou
-speedup de apenas 1.01, enquanto 3 threads atingiram 1.16. Com 4 threads,
-o speedup caiu para 1.07.
+A utilização de 4 threads não produziu ganho adicional em relação a
+3 threads.
 
-Portanto, os testes demonstram que a paralelização pode reduzir o tempo
-de execução, mas o melhor número de threads depende da relação entre o
-trabalho paralelo realizado e os custos adicionais introduzidos pela
-execução concorrente.
+Esse comportamento mostra que o aumento da quantidade de threads não
+resulta necessariamente em aceleração proporcional.
+
+Entre os fatores que influenciam esse resultado estão:
+
+- custo de criação e finalização das threads;
+- acesso concorrente à memória;
+- diferenças de carga entre as regiões da matriz;
+- custo da consolidação das fronteiras;
+- partes da implementação que continuam sequenciais;
+- comportamento da hierarquia de memória e cache.
+
+Também é possível observar a redução da eficiência conforme o número de
+threads aumenta. Na matriz 4000x4000, por exemplo, a eficiência foi de
+0.52 com 2 threads, 0.45 com 3 threads e 0.33 com 4 threads.
+
+Portanto, para o ambiente utilizado nos testes, a configuração com
+3 threads apresentou o melhor equilíbrio entre paralelismo e sobrecarga.
