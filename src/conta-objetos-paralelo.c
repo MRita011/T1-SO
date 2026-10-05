@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "lib/contagem.h"
 
-int main(void) {
+int main(int argc, char *argv[]) {
 
     int teste_diagonal[] = {
         0, 1, 0, 0,
@@ -82,12 +84,34 @@ int main(void) {
     int teste;
     int num_threads;
     int resultado;
+    int thread_inicio;
+    int thread_fim;
 
     matrizes[0] = matriz1;
     matrizes[1] = matriz2;
     matrizes[2] = matriz3;
     matrizes[3] = matriz4;
     matrizes[4] = matriz5;
+
+    if (argc == 2) {
+        num_threads = atoi(argv[1]);
+
+        if (num_threads < 2 || num_threads > 4) {
+            printf("Uso: ./paralelo [2|3|4]\n");
+            return 1;
+        }
+
+        thread_inicio = num_threads;
+        thread_fim = num_threads;
+    }
+    else if (argc == 1) {
+        thread_inicio = 2;
+        thread_fim = 4;
+    }
+    else {
+        printf("Uso: ./paralelo [2|3|4]\n");
+        return 1;
+    }
 
     printf("\n");
     printf("+--------+----------+---------+----------+--------+----------+\n");
@@ -96,7 +120,7 @@ int main(void) {
 
     for (teste = 0; teste < 5; teste++) {
 
-        for (num_threads = 2; num_threads <= 4; num_threads++) {
+        for (num_threads = thread_inicio; num_threads <= thread_fim; num_threads++) {
             resultado = contar_objetos_paralelo(matrizes[teste], linhas[teste], colunas[teste], num_threads);
             printf("| %-6d | %2dx%-5d | %-7d | %-8d | %-6d | %-8s |\n", teste + 1, linhas[teste], colunas[teste], num_threads, esperados[teste], resultado, resultado == esperados[teste] ? "OK" : "ERRO");
         }
