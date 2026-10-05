@@ -64,14 +64,17 @@ int contar_objetos_sequencial(int *matriz, int linhas, int colunas) {
     return objetos;
 }
 
+
 /* Verifica a fronteira entre duas regioes */
 
 static int consolidar_fronteira(int *matriz, int *rotulos, int colunas, int linha_superior, int linha_inferior, UnionFind *uf) {
     int coluna;
     int deslocamento;
     int coluna_inferior;
-    int indice_superior, indice_inferior;
-    int rotulo_superior, rotulo_inferior;
+    int indice_superior;
+    int indice_inferior;
+    int rotulo_superior;
+    int rotulo_inferior;
     int unioes;
 
     unioes = 0;
@@ -101,6 +104,7 @@ static int consolidar_fronteira(int *matriz, int *rotulos, int colunas, int linh
 
     return unioes;
 }
+
 
 /* Funcao executada por cada thread */
 
@@ -144,6 +148,7 @@ static void *processar_regiao(void *arg) {
     return NULL;
 }
 
+
 /* Contagem paralela */
 
 int contar_objetos_paralelo(int *matriz, int linhas, int colunas, int num_threads) {
@@ -155,10 +160,14 @@ int contar_objetos_paralelo(int *matriz, int linhas, int colunas, int num_thread
     int total_celulas;
     int max_rotulos;
 
-    int i, j, retorno;
+    int i;
+    int j;
+    int retorno;
     int threads_criadas;
+    int erro_join;
 
-    int total_local, total_global;
+    int total_local;
+    int total_global;
     int unioes;
 
     if (num_threads < 1 || num_threads > linhas) {
@@ -195,6 +204,7 @@ int contar_objetos_paralelo(int *matriz, int linhas, int colunas, int num_thread
         args[i].linha_inicio = i * linhas / num_threads;
         args[i].linha_fim = ((i + 1) * linhas / num_threads) - 1;
         args[i].objetos_locais = 0;
+        args[i].erro = 0;
     }
 
     threads_criadas = 0;
@@ -205,8 +215,20 @@ int contar_objetos_paralelo(int *matriz, int linhas, int colunas, int num_thread
         if (retorno != 0) {
             printf("Erro ao criar thread %d\n", i);
 
+            erro_join = 0;
+
             for (j = 0; j < threads_criadas; j++) {
-                pthread_join(threads[j], NULL);
+                retorno = pthread_join(threads[j], NULL);
+
+                if (retorno != 0) {
+                    printf("Erro ao aguardar thread %d durante limpeza\n", j);
+                    erro_join = 1;
+                }
+            }
+
+            if (erro_join) {
+                printf("Nao foi possivel finalizar todas as threads com seguranca.\n");
+                exit(EXIT_FAILURE);
             }
 
             free(threads);
@@ -219,11 +241,25 @@ int contar_objetos_paralelo(int *matriz, int linhas, int colunas, int num_thread
         threads_criadas++;
     }
 
+    erro_join = 0;
+
     for (i = 0; i < num_threads; i++) {
         retorno = pthread_join(threads[i], NULL);
 
         if (retorno != 0) {
             printf("Erro ao aguardar thread %d\n", i);
+            erro_join = 1;
+        }
+    }
+
+    if (erro_join) {
+        printf("Nao foi possivel finalizar todas as threads com seguranca.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (i = 0; i < num_threads; i++) {
+        if (args[i].erro) {
+            printf("Erro ao alocar memoria em uma das threads.\n");
             free(threads);
             free(args);
             free(rotulos);
