@@ -5,7 +5,7 @@ Trabalho desenvolvido para a disciplina de **Sistemas Operacionais: 2026/2**.
 ## Integrantes
 
 - Gabriel Kowaleski
-- Jully Anne Seifert
+- Jully Anne Seyffert da Silva Jara
 - Maria Rita Rodrigues
 - Mayra Bordin
 
@@ -57,6 +57,7 @@ T1-SO/
 │       ├── union-find.c
 │       └── union-find.h
 └── tests/
+    ├── teste-aleatorio.c
     ├── teste-desempenho.c
     └── gerar-graficos.py
 ```
@@ -518,6 +519,19 @@ Todos apresentaram status:
 ```text
 OK
 ```
+
+---
+
+# Teste aleatório
+
+Compara a versão paralela (1 a 8 threads) com a sequencial em 20.000 matrizes pseudoaleatórias de até 30x30. Não faz parte do `make` padrão:
+
+```bash
+make aleatorio
+./aleatorio
+```
+
+Resultado esperado: `Divergencias: 0`. O programa retorna código diferente de zero se houver qualquer divergência.
 
 ---
 

@@ -15,19 +15,19 @@
 | Matrícula do integrante 1 | 23200079 |
 | Integrante 2 | Mayra Bordin de Abreu |
 | Matrícula do integrante 2 | 23112156 |
-| Integrante 3 | Jully Anne Seyffert |
+| Integrante 3 | Jully Anne Seyffert da Silva Jara |
 | Matrícula do integrante 3 | 23280111 |
 | Integrante 4 | Gabriel Ribeiro Kowaleski |
 | Matrícula do integrante 4 | 23112539 |
-| Modalidade | grupo |
+| Modalidade | grupo (4 integrantes, autorizado pelo professor) |
 | Turma | 330 |
 | Estratégia paralela | Pthreads |
 | Plataforma testada | Linux - Ubuntu 26.04.1 LTS em ambiente WSL |
-| Commit avaliado | `63c8ead` |
+| Commit avaliado | `334ac81` |
 
 ## Resumo
 
-Este trabalho apresenta a implementação sequencial e paralela de um algoritmo para contagem de objetos em matrizes binárias utilizando conectividade 8. Na versão sequencial, a matriz é percorrida integralmente e cada novo componente é explorado por meio de Flood Fill iterativo com pilha explícita. Na versão paralela, a matriz é dividida estaticamente em faixas horizontais de linhas processadas por threads POSIX. Cada thread identifica e rotula os componentes existentes em sua região. Após a finalização das threads, os objetos que atravessam as fronteiras das regiões são consolidados por meio da estrutura Union-Find, preservando conexões verticais e diagonais entre regiões. As cinco matrizes obrigatórias produziram resultados idênticos nas versões sequencial e paralela, assim como os testes adicionais. Nos testes de desempenho com matrizes de até 4000x4000, todas as configurações paralelas da coleta final apresentaram aceleração em relação à versão sequencial, sendo três threads a configuração com melhor tempo médio nos três tamanhos avaliados.
+Este trabalho apresenta a implementação sequencial e paralela de um algoritmo para contagem de objetos em matrizes binárias utilizando conectividade 8. Na versão sequencial, a matriz é percorrida integralmente e cada novo componente é explorado por meio de Flood Fill iterativo com pilha explícita. Na versão paralela, a matriz é dividida estaticamente em faixas horizontais de linhas processadas por threads POSIX. Cada thread identifica e rotula os componentes existentes em sua região. Após a finalização das threads, os objetos que atravessam as fronteiras das regiões são consolidados por meio da estrutura Union-Find, preservando conexões verticais e diagonais entre regiões. As cinco matrizes obrigatórias produziram resultados idênticos nas versões sequencial e paralela, assim como os testes adicionais. Um teste aleatório com 141.397 comparações entre as duas versões não apresentou divergências, e sua execução com AddressSanitizer, UBSan e ThreadSanitizer não relatou erros. Nos testes de desempenho com matrizes de até 4000x4000, todas as configurações paralelas da coleta final apresentaram aceleração em relação à versão sequencial, sendo três threads a configuração com melhor tempo médio nos três tamanhos avaliados.
 
 **Palavras-chave:** sistemas operacionais; paralelismo; threads; conectividade 8; flood fill; componentes conexos; Union-Find.
 
@@ -89,11 +89,12 @@ O projeto contém duas implementações funcionalmente equivalentes:
 │       ├── union-find.c
 │       └── union-find.h
 └── tests/
+    ├── teste-aleatorio.c
     ├── teste-desempenho.c
     └── gerar-graficos.py
 ```
 
-A árvore acima representa a estrutura atual do repositório. Arquivos ainda não existentes, como os slides finais da apresentação, não foram listados.
+A árvore acima representa a estrutura atual do repositório. Os slides finais da apresentação (`slides/apresentacao.pdf`) serão adicionados quando a versão final for exportada.
 
 | Caminho | Finalidade |
 |---|---|
@@ -102,6 +103,7 @@ A árvore acima representa a estrutura atual do repositório. Arquivos ainda nã
 | [`src/lib/contagem.c`](src/lib/contagem.c) | Contém as funções principais de contagem sequencial e paralela, criação das threads e consolidação das fronteiras. |
 | [`src/lib/flood-fill.c`](src/lib/flood-fill.c) | Implementa o Flood Fill iterativo. |
 | [`src/lib/union-find.c`](src/lib/union-find.c) | Implementa a estrutura Union-Find utilizada na consolidação. |
+| [`tests/teste-aleatorio.c`](tests/teste-aleatorio.c) | Compara a versão paralela com a sequencial em 20.000 matrizes pseudoaleatórias. |
 | [`tests/teste-desempenho.c`](tests/teste-desempenho.c) | Executa e registra as medições de desempenho. |
 | [`tests/gerar-graficos.py`](tests/gerar-graficos.py) | Gera os gráficos a partir dos dados brutos. |
 | [`results/medicoes.csv`](results/medicoes.csv) | Armazena os dados brutos das cinco repetições de cada configuração. |
@@ -146,6 +148,7 @@ Também é possível compilar individualmente:
 make sequencial
 make paralelo
 make desempenho
+make aleatorio
 ```
 
 Os executáveis produzidos são:
@@ -154,7 +157,10 @@ Os executáveis produzidos são:
 sequencial
 paralelo
 desempenho
+aleatorio
 ```
+
+O alvo `aleatorio` não faz parte de `make` (alvo `all`) e deve ser compilado separadamente.
 
 Para removê-los:
 
@@ -583,6 +589,7 @@ Nos testes de desempenho, cada configuração foi repetida cinco vezes. A quanti
 | A2 | 6 x 4 | Um único objeto ocupando três regiões | 1 | 3 threads | 1 | Aprovado |
 | A3 | 4 x 4 | Conexão diagonal atravessando a fronteira | 1 | 2 threads | 1 | Aprovado |
 | A4 | 4000 x 4000 | Matriz grande usada no desempenho | 724346 | 2, 3 e 4 threads | 724346 | Aprovado |
+| A5 | 1x1 até 30x30 | 20.000 matrizes pseudoaleatórias (semente 12345, densidade de 5% a 74%) | Versão sequencial | 1 a 8 threads (141.397 comparações) | 0 divergências | Aprovado |
 
 ### 8.4 Repetibilidade e determinismo
 
@@ -758,10 +765,11 @@ As falhas de alocação da pilha local das threads são registradas no campo `er
 |---|---|---|
 | Compilação C89/C90 | `make` | Compilação concluída sem erros |
 | Avisos do compilador | `-Wall -Wextra -pedantic` | Nenhum aviso apresentado na versão validada |
-| Vazamentos de memória | Não foi utilizada ferramenta dinâmica específica | Não verificado com Valgrind, Leaks ou sanitizer |
-| Condições de corrida | Revisão da estratégia e testes funcionais | Não foi executado ThreadSanitizer ou Helgrind |
+| Erros de memória e comportamento indefinido | AddressSanitizer e UBSan (`-fsanitize=address,undefined`) sobre `tests/teste-aleatorio.c` | Nenhum erro relatado |
+| Condições de corrida | ThreadSanitizer (`-fsanitize=thread`) sobre `tests/teste-aleatorio.c` | Nenhuma corrida de dados relatada |
+| Vazamentos de memória | Revisão do código | Sem verificação dinâmica dedicada (Valgrind ou LeakSanitizer) |
 
-A ausência de ferramentas dinâmicas específicas de detecção de vazamentos ou condições de corrida deve ser considerada uma limitação da validação realizada.
+Os sanitizers foram executados em macOS (Apple clang 21, arm64) sobre o teste aleatório, que exercita a versão paralela com 1 a 8 threads. Essa verificação não cobre as matrizes de 4000x4000 do teste de desempenho, e os vazamentos de memória não foram verificados dinamicamente, o que deve ser considerado uma limitação da validação realizada.
 
 A estratégia foi projetada para evitar escritas concorrentes sobre a mesma célula do vetor de rótulos: cada thread modifica somente as linhas pertencentes à sua própria região.
 
@@ -774,6 +782,7 @@ O projeto separa as responsabilidades em módulos:
 - [`src/lib/contagem.c`](src/lib/contagem.c): contagem, particionamento, criação das threads, sincronização e consolidação das fronteiras;
 - [`src/lib/flood-fill.c`](src/lib/flood-fill.c): exploração iterativa dos componentes;
 - [`src/lib/union-find.c`](src/lib/union-find.c): unificação de equivalências;
+- [`tests/teste-aleatorio.c`](tests/teste-aleatorio.c): comparação entre as versões paralela e sequencial em matrizes pseudoaleatórias;
 - [`tests/teste-desempenho.c`](tests/teste-desempenho.c): medição e geração dos dados brutos;
 - [`tests/gerar-graficos.py`](tests/gerar-graficos.py): geração dos gráficos.
 
@@ -798,10 +807,13 @@ Na implementação paralela, a matriz foi dividida em faixas horizontais process
 
 Os testes de desempenho mostraram aceleração em todas as configurações da coleta final, porém o ganho não cresceu proporcionalmente ao número de threads. Três threads apresentaram o melhor tempo médio nos três tamanhos de matriz. O principal aprendizado do projeto foi que paralelizar a identificação local não elimina os custos de criação, sincronização, acesso à memória e consolidação, e que essas sobrecargas influenciam diretamente a eficiência. Como melhoria futura, podem ser investigadas estratégias de balanceamento dinâmico e formas de reduzir o custo da estrutura de consolidação.
 
-## 13. Vídeo de apresentação
+## 13. Apresentação
 
-| Campo | Informação |
+A apresentação será realizada em aula, em até 10 minutos, conforme o enunciado, e todos os integrantes participarão. Os slides estão em `slides/apresentacao.pdf`. Não há vídeo gravado.
+
+| Tempo | Conteúdo |
 |---|---|
+<<<<<<< HEAD
 | Plataforma | [YouTube / Vimeo] |
 | Link privado ou não listado | https://youtu.be/RbMUUXoTZsU?is=qtn4_4U-1915kBvw |
 | Duração | [MM:SS - máximo de 10 minutos] |
@@ -822,17 +834,25 @@ Os testes de desempenho mostraram aceleração em todas as configurações da co
 - [ ] Resultados de desempenho.
 - [ ] Conclusões.
 - [ ] Participação de todos os integrantes do grupo.
+=======
+| 1 min | Problema e estratégia escolhida |
+| 2 min | Implementação sequencial e referência de correção |
+| 2 min | Decomposição, threads e sincronização |
+| 2 min | Consolidação e demonstração |
+| 2 min | Testes e desempenho |
+| 1 min | Conclusões |
+>>>>>>> 4d9f9330458413096e9b21c2c32a440ec3cc124e
 
 ## 14. Contribuições dos integrantes
 
 | Atividade | Maria Rita | Mayra | Jully | Gabriel | Evidência/observação |
 |---|---|---|---|---|---|
-| Projeto da solução sequencial | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Projeto da solução paralela | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Sincronização/comunicação | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Consolidação | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Testes e medições | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Documentação e apresentação | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] | [PREENCHER] |
+| Projeto da solução sequencial | [X] | [X] | [X] | [X] | [dev] |
+| Projeto da solução paralela | [X] | [X] | [ ] | [ ] | [dev] |
+| Sincronização/comunicação | [ ] | [ ] | [X] | [X] | [dev] |
+| Consolidação | [X] | [X] | [ ] | [ ] | [dev] |
+| Testes e medições | [X] | [X] | [X] | [X] | [dev] |
+| Documentação e apresentação | [X] | [ ] | [X] | [X] | [dev] |
 
 Todos os integrantes declaram compreender integralmente o código, as estruturas de dados, a divisão do trabalho, a sincronização, a comunicação, a consolidação e os resultados apresentados.
 
@@ -864,7 +884,7 @@ As sugestões fornecidas por ferramentas externas foram verificadas por compila�
 - [x] A quantidade de processos/threads é configurável.
 - [x] Conexões horizontais, verticais e diagonais são preservadas.
 - [x] Componentes que atravessam regiões são consolidados sem duplicidade.
-- [x] Não há condições de corrida, deadlocks ou atualizações perdidas conhecidas.
+- [x] Não há condições de corrida, deadlocks ou atualizações perdidas conhecidas, e o ThreadSanitizer não relatou corridas de dados no teste aleatório.
 
 ### Testes e desempenho
 
@@ -879,13 +899,12 @@ As sugestões fornecidas por ferramentas externas foram verificadas por compila�
 
 ### Repositório e apresentação
 
-- [ ] O repositório do GitHub está público.
+- [x] O repositório do GitHub está público.
 - [x] `README.md` contém descrição, autoria, compilação, execução e arquitetura.
 - [x] O `Makefile` ou as instruções equivalentes permitem compilação reproduzível.
 - [x] As matrizes de teste e seus resultados estão incluídos.
 - [x] A análise de desempenho está incluída.
 - [ ] Os slides estão em `slides/apresentacao.pdf`.
-- [ ] O link do vídeo está acessível e o vídeo tem até 10 minutos.
 - [x] Ferramentas, referências, bibliotecas e códigos externos foram identificados.
 - [x] O hash do commit avaliado foi registrado neste relatório.
 
@@ -909,6 +928,16 @@ make
 ./paralelo 2
 ./paralelo 3
 ./paralelo 4
+
+# Teste aleatório (paralela x sequencial)
+make aleatorio
+./aleatorio
+
+# Sanitizers sobre o teste aleatório
+cc -std=c89 -pthread -g -fsanitize=address,undefined tests/teste-aleatorio.c src/lib/*.c -o aleatorio-asan
+cc -std=c89 -pthread -g -fsanitize=thread tests/teste-aleatorio.c src/lib/*.c -o aleatorio-tsan
+./aleatorio-asan
+./aleatorio-tsan
 
 # Execução dos testes de desempenho
 ./desempenho
