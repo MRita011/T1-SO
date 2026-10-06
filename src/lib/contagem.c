@@ -25,12 +25,11 @@ static int consolidar_fronteira(int *matriz, int *rotulos, int colunas, int linh
 /* Contagem sequencial */
 
 int contar_objetos_sequencial(int *matriz, int linhas, int colunas) {
-    int *visitado;
-    int *pilha;
+    int *visitado, *pilha;
     int objetos;
     int i;
     int j;
-    int indice;
+    int indice; 
     int total_celulas;
 
     total_celulas = linhas * colunas;
@@ -46,7 +45,7 @@ int contar_objetos_sequencial(int *matriz, int linhas, int colunas) {
     }
 
     objetos = 0;
-
+    
     for (i = 0; i < linhas; i++) {
         for (j = 0; j < colunas; j++) {
             indice = i * colunas + j;
@@ -57,10 +56,8 @@ int contar_objetos_sequencial(int *matriz, int linhas, int colunas) {
             }
         }
     }
-
     free(visitado);
     free(pilha);
-
     return objetos;
 }
 

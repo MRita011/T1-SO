@@ -39,7 +39,6 @@ int uf_find(UnionFind *uf, int elemento) {
 
     return uf->pai[elemento];
 }
-
 int uf_union(UnionFind *uf, int a, int b) {
     int raiz_a;
     int raiz_b;

@@ -803,7 +803,7 @@ Os testes de desempenho mostraram aceleração em todas as configurações da co
 | Campo | Informação |
 |---|---|
 | Plataforma | [YouTube / Vimeo] |
-| Link privado ou não listado | [INSERIR URL COMPLETA] |
+| Link privado ou não listado | https://youtu.be/RbMUUXoTZsU?is=qtn4_4U-1915kBvw |
 | Duração | [MM:SS - máximo de 10 minutos] |
 | Privacidade | [Não listado / privado compartilhado com o professor / protegido por senha] |
 | Senha, se aplicável | [PREENCHER ou `Não se aplica`] |
