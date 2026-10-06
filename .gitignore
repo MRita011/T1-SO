@@ -61,3 +61,4 @@ dkms.conf
 /sequencial
 /desempenho.venv/
 /desempenho
+/aleatorio
